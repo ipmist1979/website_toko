@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Katalog Harga Toko</title>
+
+<style>
+
+body{
+font-family:Arial;
+background:#f4f6f9;
+margin:40px;
+}
+
+.container{
+width:90%;
+margin:auto;
+background:white;
+padding:20px;
+border-radius:8px;
+box-shadow:0 0 10px rgba(0,0,0,0.1);
+}
+
+h1{
+text-align:center;
+}
+
+input,select{
+padding:8px;
+margin:5px;
+}
+
+button{
+padding:8px 12px;
+border:none;
+background:#3498db;
+color:white;
+cursor:pointer;
+border-radius:4px;
+}
+
+.print{
+background:#2ecc71;
+}
+
+.hapus{
+background:red;
+}
+
+table{
+width:100%;
+border-collapse:collapse;
+margin-top:20px;
+}
+
+th,td{
+border:1px solid #ddd;
+padding:10px;
+text-align:center;
+}
+
+th{
+background:#2c3e50;
+color:white;
+}
+
+.kategori{
+background:#ecf0f1;
+font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>Katalog Harga Barang</h1>
+
+<input type="text" id="nama" placeholder="Nama Barang">
+
+<select id="kategori">
+<option value="">Pilih Kategori</option>
+<option>Rokok</option>
+<option>Minuman</option>
+<option>Makanan</option>
+</select>
+
+<input type="text" id="harga" placeholder="Harga">
+
+<button onclick="tambahBarang()">Tambah</button>
+
+<button class="print" onclick="window.print()">Cetak Daftar Harga</button>
+
+<br><br>
+
+Filter :
+
+<select id="filterKategori" onchange="filterKategori()">
+<option value="semua">Semua</option>
+<option value="Rokok">Rokok</option>
+<option value="Minuman">Minuman</option>
+<option value="Makanan">Makanan</option>
+</select>
+
+<input type="text" id="search" placeholder="Cari barang..." onkeyup="cariBarang()">
+
+<table>
+
+<tr>
+<th>No</th>
+<th>Kategori</th>
+<th>Nama Barang</th>
+<th>Harga</th>
+<th>Aksi</th>
+</tr>
+
+<tbody id="tabelHarga"></tbody>
+
+</table>
+
+</div>
+
+<script>
+
+let barang = JSON.parse(localStorage.getItem("barang")) || [];
+
+function simpan(){
+localStorage.setItem("barang",JSON.stringify(barang));
+}
+
+function formatRupiah(angka){
+return "Rp " + Number(angka).toLocaleString("id-ID");
+}
+
+function tampil(data = barang){
+
+let tabel=document.getElementById("tabelHarga");
+tabel.innerHTML="";
+
+data.forEach((b,i)=>{
+
+tabel.innerHTML+=`
+
+<tr>
+
+<td>${i+1}</td>
+
+<td>${b.kategori}</td>
+
+<td>${b.nama}</td>
+
+<td>
+<input type="text" value="${b.harga}" 
+onchange="updateHarga(${i},this.value)">
+<br>
+${formatRupiah(b.harga)}
+</td>
+
+<td>
+<button class="hapus" onclick="hapusBarang(${i})">Hapus</button>
+</td>
+
+</tr>
+
+`;
+
+});
+
+}
+
+function tambahBarang(){
+
+let nama=document.getElementById("nama").value;
+let kategori=document.getElementById("kategori").value;
+let harga=document.getElementById("harga").value;
+
+if(nama=="" || kategori=="" || harga==""){
+alert("Data belum lengkap");
+return;
+}
+
+barang.push({
+nama:nama,
+kategori:kategori,
+harga:harga
+});
+
+simpan();
+tampil();
+
+document.getElementById("nama").value="";
+document.getElementById("harga").value="";
+
+}
+
+function updateHarga(i,value){
+
+barang[i].harga=value;
+simpan();
+tampil();
+
+}
+
+function hapusBarang(i){
+
+if(confirm("Hapus barang?")){
+
+barang.splice(i,1);
+simpan();
+tampil();
+
+}
+
+}
+
+function filterKategori(){
+
+let kategori=document.getElementById("filterKategori").value;
+
+if(kategori=="semua"){
+tampil();
+return;
+}
+
+let hasil = barang.filter(b => b.kategori == kategori);
+
+tampil(hasil);
+
+}
+
+function cariBarang(){
+
+let keyword=document.getElementById("search").value.toLowerCase();
+
+let hasil = barang.filter(b => 
+b.nama.toLowerCase().includes(keyword)
+);
+
+tampil(hasil);
+
+}
+
+tampil();
+
+</script>
+
+</body>
+</html>
